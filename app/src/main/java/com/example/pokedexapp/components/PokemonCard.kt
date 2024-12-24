@@ -6,15 +6,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,7 +34,10 @@ import java.util.Locale
 @Composable
 fun PokemonCard(
     pokemon: Pokemon,
-    onClick: () -> Unit
+    isFavorite: Boolean,
+    onFavoriteToggle: () -> Unit,
+    onClick: () -> Unit,
+    showSnackbar: (String) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -45,17 +54,43 @@ fun PokemonCard(
             verticalArrangement = Arrangement.SpaceAround,
             modifier = Modifier.fillMaxSize()
         ) {
-            // Pokémon ID
-            Text(
-                text = pokemon.id.toString().padStart(3, '0'),
-                color = Color.White,
+            // Top Row with ID and Favorite Icon
+            Row(
                 modifier = Modifier
-                    .padding(top = 4.dp, start = 8.dp)
-                    .align(Alignment.Start)
-                    .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(25))
-                    .padding(horizontal = 6.dp, vertical = 4.dp),
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp)
-            )
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Pokémon ID
+                Text(
+                    text = pokemon.id.toString().padStart(3, '0'),
+                    color = Color.White,
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(25))
+                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 15.sp)
+                )
+
+                // Favorites Icon
+                androidx.compose.material3.Icon(
+                    imageVector = if (isFavorite) {
+                        androidx.compose.material.icons.Icons.Filled.Favorite
+                    } else {
+                        androidx.compose.material.icons.Icons.Outlined.FavoriteBorder
+                    },
+                    contentDescription = if (isFavorite) "Unfavorite Pokémon" else "Favorite Pokémon",
+                    tint = if (isFavorite) Color.Red else Color.Gray,
+                    modifier = Modifier.clickable {
+                        onFavoriteToggle()
+                        if (!isFavorite) {
+                            showSnackbar("Added to Favorites")
+                        } else {
+                            showSnackbar("Removed from Favorites")
+                        }
+                    }
+                )
+            }
 
             // Pokémon Image
             Image(
@@ -82,7 +117,7 @@ fun PokemonCard(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PokemonCardPreview() {
     val samplePokemon = Pokemon(
@@ -90,8 +125,19 @@ fun PokemonCardPreview() {
         name = "Pikachu",
         imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
     )
+
+    // Mock favorite toggle state for preview
+    val isFavorite = remember { mutableStateOf(false) } // Use a `remember` state for recomposition
+
     PokemonCard(
         pokemon = samplePokemon,
+        isFavorite = isFavorite.value,
+        onFavoriteToggle = {
+            isFavorite.value = !isFavorite.value // Update state to trigger recomposition
+        },
         onClick = {}
-    )
+    ) { message ->
+        // Mock snackbar callback for preview
+        println("Snackbar message: $message")
+    }
 }
