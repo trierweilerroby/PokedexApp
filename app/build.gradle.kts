@@ -66,6 +66,10 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation ("com.google.android.material:material:1.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+    implementation("androidx.navigation:navigation-compose:2.7.2")
+    implementation(libs.navigation.compose.v272)
 
 
     // Exercise 2
@@ -95,7 +99,7 @@ dependencies {
     // Exercise 6
     implementation(libs.androidx.datastore.preferences)
     //implementation(libs.retrofit.v230)
-   //implementation(libs.converter.gson)
+   implementation(libs.converter.gson)
    // implementation(libs.kotlinx.coroutines.core.v173)
    // implementation(libs.kotlinx.coroutines.android.v173)
 

@@ -1,6 +1,7 @@
 [versions]
 # Default
 agp = "8.7.1"
+androidxNavigationCompose = "2.7.2"
 kotlin = "2.0.20"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -70,8 +71,10 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3Version" }
 moshi = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
 moshi-adapters = { group = "com.squareup.moshi", name = "moshi-adapters", version.ref = "moshi" }
+navigation-compose-v272 = { module = "androidx.navigation:navigation-compose", version.ref = "androidxNavigationCompose" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
+converter-gson = "com.squareup.retrofit2:converter-gson:2.9.0"
 
 # Exercise 5 and onwards
 androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
