@@ -20,9 +20,18 @@ import com.example.pokedexapp.data.DataStore
 @Composable
 fun PokemonListView(
     pokemonStore: DataStore = hiltViewModel(),
-    navController: NavController
+    navController: NavController,
+    searchQuery: String
 ) {
     val pokemonList by pokemonStore.pokemonList.collectAsState()
+
+    val filteredPokemonList = if (searchQuery.isNotEmpty()) {
+        pokemonList.filter { pokemon ->
+            pokemon.name.contains(searchQuery, ignoreCase = true)
+        }
+    } else {
+        pokemonList
+    }
 
     Column(
         modifier = Modifier
@@ -43,7 +52,7 @@ fun PokemonListView(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-            items(pokemonList.chunked(2)) { row ->
+            items(filteredPokemonList.chunked(2)) { row ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
