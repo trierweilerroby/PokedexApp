@@ -34,11 +34,13 @@ import java.util.Locale
 @Composable
 fun PokemonCard(
     pokemon: Pokemon,
-    isFavorite: Boolean,
-    onFavoriteToggle: () -> Unit,
+
     onClick: () -> Unit,
-    showSnackbar: (String) -> Unit
+    // showSnackbar: (String) -> Unit
 ) {
+
+
+
     Card(
         modifier = Modifier
             .size(width = 181.dp, height = 220.dp)
@@ -67,27 +69,49 @@ fun PokemonCard(
                     text = pokemon.id.toString().padStart(3, '0'),
                     color = Color.White,
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(25))
+                        .background(
+                            MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(25)
+                        )
                         .padding(horizontal = 6.dp, vertical = 4.dp),
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 15.sp)
                 )
 
                 // Favorites Icon
                 androidx.compose.material3.Icon(
-                    imageVector = if (isFavorite) {
+                    imageVector = if (false /* Replace with actual isFavorite condition */) {
                         androidx.compose.material.icons.Icons.Filled.Favorite
                     } else {
                         androidx.compose.material.icons.Icons.Outlined.FavoriteBorder
                     },
-                    contentDescription = if (isFavorite) "Unfavorite Pokémon" else "Favorite Pokémon",
-                    tint = if (isFavorite) Color.Red else Color.Gray,
+                    contentDescription = if (false /* Replace with actual isFavorite condition */) {
+                        "Unfavorite Pokémon"
+                    } else {
+                        "Favorite Pokémon"
+                    },
+                    tint = if (false /* Replace with actual isFavorite condition */) {
+                        Color.Red
+                    } else {
+                        Color.Gray
+                    },
                     modifier = Modifier.clickable {
-                        onFavoriteToggle()
+                        // Replace with favorite toggle logic
+                        println(
+                            if (false /* Replace with actual isFavorite condition */) {
+                                "Removed ${pokemon.name} from favorites."
+                            } else {
+                                "Added ${pokemon.name} to favorites."
+                            }
+                        )
+
+                        /*
+                        Uncomment the following lines when integrating snackbar logic
                         if (!isFavorite) {
                             showSnackbar("Added to Favorites")
                         } else {
                             showSnackbar("Removed from Favorites")
                         }
+                        */
                     }
                 )
             }
@@ -117,27 +141,3 @@ fun PokemonCard(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PokemonCardPreview() {
-    val samplePokemon = Pokemon(
-        id = 25,
-        name = "Pikachu",
-        imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
-    )
-
-    // Mock favorite toggle state for preview
-    val isFavorite = remember { mutableStateOf(false) } // Use a `remember` state for recomposition
-
-    PokemonCard(
-        pokemon = samplePokemon,
-        isFavorite = isFavorite.value,
-        onFavoriteToggle = {
-            isFavorite.value = !isFavorite.value // Update state to trigger recomposition
-        },
-        onClick = {}
-    ) { message ->
-        // Mock snackbar callback for preview
-        println("Snackbar message: $message")
-    }
-}

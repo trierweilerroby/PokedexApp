@@ -12,68 +12,68 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.pokedexapp.components.PokemonCard
 import com.example.pokedexapp.data.DataStore
-import kotlinx.coroutines.launch
 
 @Composable
-fun PokemonListView(
+fun FavoritesView(
     dataStore: DataStore = hiltViewModel(),
-    navController: NavController,
-    searchQuery: String
+    navController: NavController
 ) {
-    val pokemonList by dataStore.pokemonList.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
+    // Collect the favorite Pokémon list from the store
+    val favoritePokemonList by dataStore.favoritePokemonList.collectAsState(emptyList())
 
-    // Filter Pokémon based on the search query
-    val filteredPokemonList = if (searchQuery.isNotEmpty()) {
-        pokemonList.filter { pokemon ->
-            pokemon.name.contains(searchQuery, ignoreCase = true)
-        }
-    } else {
-        pokemonList
-    }
+    // Snackbar host state for showing messages
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    println("Favorites: $favoritePokemonList")
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color(0xFFE0F7FA))
+            .padding(start = 10.dp, top = 60.dp)
     ) {
-        // Snackbar Host for displaying messages
-        SnackbarHost(hostState = snackbarHostState)
-
-        // Title
+        // Title for Favourite Pokémon
         Text(
-            text = "All Pokémon's",
+            text = "Your Favourite Pokémon's",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier
                 .padding(start = 10.dp, bottom = 6.dp)
         )
 
-        // Pokémon List
+        // Snackbar Host for showing messages
+        SnackbarHost(hostState = snackbarHostState)
+
+        // Favourite Pokémon List
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-            items(filteredPokemonList.chunked(2)) { row ->
-                Row(
+            items(favoritePokemonList.chunked(2)) { row ->
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.Center
+                        .wrapContentHeight(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    row.forEach { pokemon ->
-                        PokemonCard(
-                            pokemon = pokemon,
-                        ){
-                            navController.navigate("pokemonDetail/${pokemon.id}")
+                    Row(
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .padding(8.dp),
+                    ) {
+                        row.forEach { pokemon ->
+                            PokemonCard(
+                                pokemon = pokemon
+                            ) {
+                                navController.navigate("pokemonDetail/${pokemon.id}")
+                            }
                         }
                     }
                 }

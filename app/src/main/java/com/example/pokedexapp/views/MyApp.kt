@@ -1,5 +1,6 @@
 package com.example.pokedexapp.views
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -14,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.datastore.dataStore
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,7 +25,6 @@ import com.example.pokedexapp.components.BottomNav
 import com.example.pokedexapp.components.SearchBar
 import com.example.pokedexapp.data.DataStore
 import com.example.pokedexapp.model.Pokemon
-import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
 fun MyApp(
@@ -47,7 +48,9 @@ fun MyApp(
                     searchQuery.value = query
                 }
             }
-            composable("favorites") { FavoritesScreen() }
+            composable("favorites") {
+                FavoritesView(dataStore = dataStore,
+                    navController = navController,) }
 
             composable("pokemonDetail/{pokemonId}") { backStackEntry ->
                 val pokemonIdString = backStackEntry.arguments?.getString("pokemonId")
@@ -59,7 +62,7 @@ fun MyApp(
                     val loading = remember { mutableStateOf(true) }
 
                     // Collect the favourite Pokémon list as a state
-                    val favouritePokemonList by dataStore.favouritePokemonList.collectAsState()
+                    val favoritePokemonList by dataStore.favoritePokemonList.collectAsState()
 
                     LaunchedEffect(pokemonId) {
                         dataStore.getPokemonDetailsById(pokemonId) { fetchedPokemon ->
@@ -72,12 +75,13 @@ fun MyApp(
                         Text("Loading...")
                     } else {
                         pokemon.value?.let { fetchedPokemon ->
-                            val isFavourite = favouritePokemonList.contains(fetchedPokemon) // Check if it's in the favorites list
+                            val isFavorite = favoritePokemonList.contains(fetchedPokemon)
                             PokemonDetailView(
                                 pokemon = fetchedPokemon,
-                                isFavourite = isFavourite,
-                                onToggleFavourite = { selectedPokemon ->
+                                isFavorite = isFavorite,
+                                onToggleFavorite = { selectedPokemon ->
                                     dataStore.toggleFavorite(selectedPokemon)
+                                    Log.d("favouritePokemonList", "$favoritePokemonList")
                                 }
                             )
                         } ?: run {
@@ -108,17 +112,13 @@ fun PokemonListScreen(
 
         // Pass the searchQuery to filter Pokémon in the PokemonListView
         PokemonListView(
-            pokemonStore = viewModel,
+            dataStore = viewModel,
             navController = navController,
             searchQuery = searchQuery
         )
     }
 }
 
-@Composable
-fun FavoritesScreen() {
-    Text(text = "Favorites Screen")
-}
 
 @Preview
 @Composable

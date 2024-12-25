@@ -22,8 +22,8 @@ class DataStore @Inject constructor(
     private val pokemonDetailsMapper: PokemonDetailsMapper
 ) : ViewModel() {
 
-    private val _favouritePokemonList = MutableStateFlow<Set<Pokemon>>(emptySet()) // Using a Set to avoid duplicates
-    val favouritePokemonList: StateFlow<Set<Pokemon>> = _favouritePokemonList
+    private val _favoritePokemonList = MutableStateFlow<Set<Pokemon>>(emptySet())
+    val favoritePokemonList: StateFlow<Set<Pokemon>> = _favoritePokemonList
 
 
     private val apiService: PokemonAPIService = Retrofit.Builder()
@@ -35,9 +35,9 @@ class DataStore @Inject constructor(
     private val _pokemonList = MutableStateFlow<List<Pokemon>>(emptyList())
     val pokemonList: StateFlow<List<Pokemon>> = _pokemonList
 
-    // Favorites storage
+    /*// Favorites storage
     private val _favoritePokemonIds = MutableStateFlow<Set<Int>>(emptySet())
-    val favoritePokemonIds: StateFlow<Set<Int>> = _favoritePokemonIds
+    val favoritePokemonIds: StateFlow<Set<Int>> = _favoritePokemonIds*/
 
     init {
         fetchPokemonList()
@@ -56,19 +56,25 @@ class DataStore @Inject constructor(
         }
     }
 
-    // Check if a Pokémon is a favorite -not working
+    // Check if a Pokémon is a favorite
     fun isFavorite(pokemon: Pokemon): Boolean {
-        return favoritePokemonIds.value.contains(pokemon.id)
+        return _favoritePokemonList.value.contains(pokemon)
     }
 
-    // Toggle the favorite status of a Pokémon not working
-    fun toggleFavorite(pokemon: Pokemon) {
-        _favoritePokemonIds.update { currentFavorites ->
-            if (currentFavorites.contains(pokemon.id)) {
-                currentFavorites - pokemon.id
+    // Toggle the favorite status of a Pokémon
+    fun toggleFavorite(selectedPokemon: Pokemon) {
+        _favoritePokemonList.update { currentFavorites ->
+            val updatedFavorites = if (currentFavorites.contains(selectedPokemon)) {
+                Log.d("Favorites", "Removing: ${selectedPokemon.name} (ID: ${selectedPokemon.id})")
+                currentFavorites - selectedPokemon
             } else {
-                currentFavorites + pokemon.id
+                Log.d("Favorites", "Adding: ${selectedPokemon.name} (ID: ${selectedPokemon.id})")
+                currentFavorites + selectedPokemon
             }
+            Log.d("Favorites", "Updated Favorites List: $updatedFavorites")
+            Log.d("favouritePokemonList", "$_favoritePokemonList")
+            updatedFavorites
+
         }
     }
 
@@ -85,6 +91,4 @@ class DataStore @Inject constructor(
             }
         }
     }
-
-
 }

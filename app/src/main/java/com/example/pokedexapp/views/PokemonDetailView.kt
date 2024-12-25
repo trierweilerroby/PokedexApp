@@ -36,12 +36,18 @@ import com.example.pokedexapp.theme.lightCustomColors
 import java.util.Locale
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
+import com.example.pokedexapp.data.DataStore
 
 @Composable
 fun PokemonDetailView(
     pokemon: Pokemon,
-    isFavourite: Boolean,
-    onToggleFavourite: (Pokemon) -> Unit
+    isFavorite: Boolean,
+    onToggleFavorite: (Pokemon) -> Unit
 ) {
     // Add a ScrollState to enable scrolling
     val scrollState = rememberScrollState()
@@ -50,7 +56,7 @@ fun PokemonDetailView(
         modifier = Modifier
             .fillMaxSize()
             .background(LightColorScheme.background)
-            .verticalScroll(scrollState) // Enable scrolling
+            .verticalScroll(scrollState)
             .padding(horizontal = 20.dp, vertical = 60.dp),
         horizontalAlignment = Alignment.Start
     ) {
@@ -61,7 +67,7 @@ fun PokemonDetailView(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Pokemon Name
+
             Text(
                 text = pokemon.name.replaceFirstChar { it.titlecase(Locale.ROOT) },
                 style = MaterialTheme.typography.headlineLarge.copy(
@@ -71,16 +77,16 @@ fun PokemonDetailView(
                 )
             )
 
-            // Heart Icon for Favourite
+            // favorites
             Icon(
-                imageVector = if (isFavourite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                contentDescription = "Favourite Icon",
+                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                contentDescription = "Favorite Pokémon",
                 modifier = Modifier
                     .size(28.dp)
                     .clickable {
-                        onToggleFavourite(pokemon)
+                        onToggleFavorite(pokemon)
                     },
-                tint = if (isFavourite) Color.Red else Color.Gray
+                tint = if (isFavorite) Color.Red else Color.Gray
             )
         }
 
@@ -106,7 +112,7 @@ fun PokemonDetailView(
 
         // Pokemon Image
         Image(
-            painter = rememberImagePainter(pokemon.imageUrl),
+            painter = rememberAsyncImagePainter(pokemon.imageUrl),
             contentDescription = "${pokemon.name} image",
             modifier = Modifier
                 .size(200.dp) // Larger image size
@@ -123,8 +129,8 @@ fun PokemonDetailView(
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             TabItem(text = "About", selected = true)
-            TabItem(text = "Stats", selected = false) // not implementing these
-            TabItem(text = "Evolution", selected = false) // not implementing these
+            TabItem(text = "Stats", selected = false)
+            TabItem(text = "Evolution", selected = false)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -223,13 +229,13 @@ fun PokemonDetailViewPreview() {
         abilities = listOf("Static", "Lightning Rod")
     )
 
-    val isFavourite = remember { mutableStateOf(false) }
+    val isFavorite = remember { mutableStateOf(false) }
 
     PokemonDetailView(
         pokemon = samplePokemon,
-        isFavourite = isFavourite.value,
-        onToggleFavourite = {
-            isFavourite.value = !isFavourite.value
+        isFavorite = isFavorite.value,
+        onToggleFavorite = {
+            isFavorite.value = !isFavorite.value
         }
     )
 }

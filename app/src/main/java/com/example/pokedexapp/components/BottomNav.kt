@@ -3,6 +3,7 @@ package com.example.pokedexapp.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -22,7 +23,7 @@ fun BottomNav(navController: NavController) {
         NavigationBarItem(
             selected = false, // Add logic to track selection
             onClick = { navController.navigate("favorites") },
-            icon = { Icon(Icons.Default.Favorite, contentDescription = "Favorites") },
+            icon = { Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorites") },
             label = { Text("Favorites") }
         )
     }
