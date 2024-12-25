@@ -34,6 +34,8 @@ import com.example.pokedexapp.model.Pokemon
 import com.example.pokedexapp.theme.LightColorScheme
 import com.example.pokedexapp.theme.lightCustomColors
 import java.util.Locale
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 @Composable
 fun PokemonDetailView(
@@ -41,15 +43,17 @@ fun PokemonDetailView(
     isFavourite: Boolean,
     onToggleFavourite: (Pokemon) -> Unit
 ) {
+    // Add a ScrollState to enable scrolling
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(LightColorScheme.background)
+            .verticalScroll(scrollState) // Enable scrolling
             .padding(horizontal = 20.dp, vertical = 60.dp),
         horizontalAlignment = Alignment.Start
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -119,15 +123,16 @@ fun PokemonDetailView(
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             TabItem(text = "About", selected = true)
-            TabItem(text = "Stats", selected = false) //not implementing these
-            TabItem(text = "Evolution", selected = false) //not implementing these
+            TabItem(text = "Stats", selected = false) // not implementing these
+            TabItem(text = "Evolution", selected = false) // not implementing these
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Information section
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .background(Color.White)
                 .padding(10.dp),
         ) {
@@ -141,6 +146,7 @@ fun PokemonDetailView(
         }
     }
 }
+
 
 private fun getTypeColor(type: String): Color {
     val customColors = lightCustomColors()

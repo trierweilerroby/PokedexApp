@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pokedexapp.interfaces.PokemonAPIService
+import com.example.pokedexapp.mappers.PokemonDetailsMapper
 import com.example.pokedexapp.mappers.PokemonListMapper
 import com.example.pokedexapp.model.Pokemon
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,8 +18,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DataStore @Inject constructor(
-    private val pokemonListMapper: PokemonListMapper
+    private val pokemonListMapper: PokemonListMapper,
+    private val pokemonDetailsMapper: PokemonDetailsMapper
 ) : ViewModel() {
+
+    private val _favouritePokemonList = MutableStateFlow<Set<Pokemon>>(emptySet()) // Using a Set to avoid duplicates
+    val favouritePokemonList: StateFlow<Set<Pokemon>> = _favouritePokemonList
+
 
     private val apiService: PokemonAPIService = Retrofit.Builder()
         .baseUrl("https://pokeapi.co/api/v2/")
@@ -50,12 +56,12 @@ class DataStore @Inject constructor(
         }
     }
 
-    // Check if a Pokémon is a favorite
+    // Check if a Pokémon is a favorite -not working
     fun isFavorite(pokemon: Pokemon): Boolean {
         return favoritePokemonIds.value.contains(pokemon.id)
     }
 
-    // Toggle the favorite status of a Pokémon
+    // Toggle the favorite status of a Pokémon not working
     fun toggleFavorite(pokemon: Pokemon) {
         _favoritePokemonIds.update { currentFavorites ->
             if (currentFavorites.contains(pokemon.id)) {
@@ -65,4 +71,20 @@ class DataStore @Inject constructor(
             }
         }
     }
+
+    // Method to fetch Pokémon details using the details mapper
+    fun getPokemonDetailsById(id: Int, onResult: (Pokemon?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response = apiService.getPokemonDetailsById(id)
+                val pokemon = response.let { pokemonDetailsMapper.mapPokemonDetails(id, it) }
+                onResult(pokemon)
+            } catch (e: Exception) {
+                Log.e("PokemonStore", "Error fetching Pokémon details: $e")
+                onResult(null)
+            }
+        }
+    }
+
+
 }
