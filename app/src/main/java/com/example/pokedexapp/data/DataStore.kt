@@ -35,9 +35,9 @@ class DataStore @Inject constructor(
     private val _pokemonList = MutableStateFlow<List<Pokemon>>(emptyList())
     val pokemonList: StateFlow<List<Pokemon>> = _pokemonList
 
-    /*// Favorites storage
+    // Favorites storage
     private val _favoritePokemonIds = MutableStateFlow<Set<Int>>(emptySet())
-    val favoritePokemonIds: StateFlow<Set<Int>> = _favoritePokemonIds*/
+    val favoritePokemonIds: StateFlow<Set<Int>> = _favoritePokemonIds
 
     init {
         fetchPokemonList()

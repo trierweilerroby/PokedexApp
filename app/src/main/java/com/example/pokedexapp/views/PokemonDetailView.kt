@@ -36,9 +36,11 @@ import com.example.pokedexapp.theme.lightCustomColors
 import java.util.Locale
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.datastore.dataStore
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.pokedexapp.data.DataStore
@@ -47,10 +49,15 @@ import com.example.pokedexapp.data.DataStore
 fun PokemonDetailView(
     pokemon: Pokemon,
     isFavorite: Boolean,
+    //dataStore: DataStore = hiltViewModel()
     onToggleFavorite: (Pokemon) -> Unit
 ) {
     // Add a ScrollState to enable scrolling
     val scrollState = rememberScrollState()
+
+   /* val isFavorite by dataStore.favoritePokemonList.collectAsState().let {
+        derivedStateOf { it.value.contains(pokemon) }
+    }*/
 
     Column(
         modifier = Modifier
@@ -84,6 +91,7 @@ fun PokemonDetailView(
                 modifier = Modifier
                     .size(28.dp)
                     .clickable {
+                        //dataStore.toggleFavorite(pokemon)
                         onToggleFavorite(pokemon)
                     },
                 tint = if (isFavorite) Color.Red else Color.Gray
@@ -215,27 +223,4 @@ fun InfoRow(label: String, value: String) {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun PokemonDetailViewPreview() {
-    val samplePokemon = Pokemon(
-        id = 25,
-        name = "Pikachu",
-        imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
-        baseExperience = 112,
-        weight = 60,
-        height = 4,
-        types = listOf("Electric"),
-        abilities = listOf("Static", "Lightning Rod")
-    )
 
-    val isFavorite = remember { mutableStateOf(false) }
-
-    PokemonDetailView(
-        pokemon = samplePokemon,
-        isFavorite = isFavorite.value,
-        onToggleFavorite = {
-            isFavorite.value = !isFavorite.value
-        }
-    )
-}
