@@ -39,14 +39,11 @@ import java.util.Locale
 @Composable
 fun PokemonCard(
     pokemon: Pokemon,
-    //isFavorite: Boolean,
-    //onFavoriteToggle: (Pokemon) -> Unit,
     dataStore : DataStore,
     onClick: () -> Unit,
-    // showSnackbar: (String) -> Unit
+    showSnackbar: (String) -> Unit
 ) {
 
-    //var favoriteState by remember { mutableStateOf(isFavorite) }
 
     val favoritePokemonList by dataStore.favoritePokemonList.collectAsState()
     val isFavorite = favoritePokemonList.contains(pokemon)
@@ -106,14 +103,12 @@ fun PokemonCard(
                     },
                     modifier = Modifier.clickable {
                         dataStore.toggleFavorite(pokemon)
-                        /*
-                        Uncomment the following lines when integrating snackbar logic
-                        if (!isFavorite) {
-                            showSnackbar("Added to Favorites")
+                        // Trigger Snackbar callback
+                        if (isFavorite) {
+                            showSnackbar("${pokemon.name} removed from Favorites")
                         } else {
-                            showSnackbar("Removed from Favorites")
+                            showSnackbar("${pokemon.name} added to Favorites")
                         }
-                        */
                     }
                 )
             }

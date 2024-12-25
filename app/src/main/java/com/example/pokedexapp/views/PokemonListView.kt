@@ -75,15 +75,13 @@ fun PokemonListView(
                             dataStore = dataStore,
                             onClick = {
                                 navController.navigate("pokemonDetail/${pokemon.id}")
+                            },
+                            showSnackbar = { message ->
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(message)
+                                }
                             }
                         )
-                        /*isFavorite = dataStore.isFavorite(pokemon),
-                        onFavoriteToggle = {
-                            dataStore.toggleFavorite(pokemon)
-                        }
-                    ) {
-                        navController.navigate("pokemonDetail/${pokemon.id}")
-                    }*/
                     }
                 }
             }

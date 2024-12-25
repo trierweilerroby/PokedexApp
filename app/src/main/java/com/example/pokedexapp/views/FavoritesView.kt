@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.pokedexapp.components.PokemonCard
 import com.example.pokedexapp.data.DataStore
+import kotlinx.coroutines.launch
 
 @Composable
 fun FavoritesView(
@@ -31,6 +33,7 @@ fun FavoritesView(
 
     // Snackbar host state for showing messages
     val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     println("Favorites: $favoritePokemonList")
 
@@ -74,16 +77,13 @@ fun FavoritesView(
                                 dataStore = dataStore,
                                 onClick = {
                                     navController.navigate("pokemonDetail/${pokemon.id}")
+                                },
+                                showSnackbar = { message ->
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(message)
+                                    }
                                 }
                             )
-                                /*isFavorite = dataStore.isFavorite(pokemon),
-                                onFavoriteToggle = {
-                                    dataStore.toggleFavorite(pokemon)
-                                }
-                            ) {
-                                navController.navigate("pokemonDetail/${pokemon.id}")
-                            }*/
-
                         }
                     }
                 }

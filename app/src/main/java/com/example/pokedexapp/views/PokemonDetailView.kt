@@ -48,9 +48,7 @@ import com.example.pokedexapp.data.DataStore
 @Composable
 fun PokemonDetailView(
     pokemon: Pokemon,
-    //isFavorite: Boolean,
     dataStore: DataStore = hiltViewModel(),
-    //onToggleFavorite: (Pokemon) -> Unit
 ) {
     // Add a ScrollState to enable scrolling
     val scrollState = rememberScrollState()
