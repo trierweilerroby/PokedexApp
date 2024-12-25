@@ -5,17 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.datastore.dataStore
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -43,25 +36,29 @@ fun MyApp(
             startDestination = "pokemons",
             Modifier.padding(innerPadding)
         ) {
+            // Pokémon List Screen
             composable("pokemons") {
                 PokemonListScreen(dataStore, navController, searchQuery.value) { query ->
                     searchQuery.value = query
                 }
             }
-            composable("favorites") {
-                FavoritesView(dataStore = dataStore,
-                    navController = navController,) }
 
+            // Favorites Screen
+            composable("favorites") {
+                FavoritesView(
+                    dataStore = dataStore,
+                    navController = navController
+                )
+            }
+
+            // Pokémon Detail Screen
             composable("pokemonDetail/{pokemonId}") { backStackEntry ->
                 val pokemonIdString = backStackEntry.arguments?.getString("pokemonId")
                 val pokemonId = pokemonIdString?.toIntOrNull()
 
                 if (pokemonId != null) {
-                    // Use remember to avoid unnecessary recompositions
                     val pokemon = remember { mutableStateOf<Pokemon?>(null) }
                     val loading = remember { mutableStateOf(true) }
-
-                    // Collect the favourite Pokémon list as a state
                     val favoritePokemonList by dataStore.favoritePokemonList.collectAsState()
 
                     LaunchedEffect(pokemonId) {
@@ -75,14 +72,18 @@ fun MyApp(
                         Text("Loading...")
                     } else {
                         pokemon.value?.let { fetchedPokemon ->
-                            val isFavorite = favoritePokemonList.contains(fetchedPokemon)
+                            // Dynamically derive `isFavorite` from `DataStore`
+                            val isFavorite by dataStore.favoritePokemonList.collectAsState()
+                                .let { derivedStateOf { it.value.contains(fetchedPokemon) } }
+
+                            // Pass `onToggleFavorite` to update favorites
                             PokemonDetailView(
                                 pokemon = fetchedPokemon,
-                                isFavorite = isFavorite,
+                                /*isFavorite = isFavorite,
                                 onToggleFavorite = { selectedPokemon ->
                                     dataStore.toggleFavorite(selectedPokemon)
-                                    Log.d("favouritePokemonList", "$favoritePokemonList")
-                                }
+                                }*/
+                                dataStore = dataStore
                             )
                         } ?: run {
                             Text("Pokémon not found")
@@ -118,7 +119,6 @@ fun PokemonListScreen(
         )
     }
 }
-
 
 @Preview
 @Composable

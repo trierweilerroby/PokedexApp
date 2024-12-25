@@ -71,13 +71,19 @@ fun FavoritesView(
                         row.forEach { pokemon ->
                             PokemonCard(
                                 pokemon = pokemon,
-                                isFavorite = dataStore.isFavorite(pokemon),
+                                dataStore = dataStore,
+                                onClick = {
+                                    navController.navigate("pokemonDetail/${pokemon.id}")
+                                }
+                            )
+                                /*isFavorite = dataStore.isFavorite(pokemon),
                                 onFavoriteToggle = {
                                     dataStore.toggleFavorite(pokemon)
                                 }
                             ) {
                                 navController.navigate("pokemonDetail/${pokemon.id}")
-                            }
+                            }*/
+
                         }
                     }
                 }

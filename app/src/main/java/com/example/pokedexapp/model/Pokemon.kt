@@ -9,4 +9,14 @@ data class Pokemon(
     val weight: Int? = null,
     val types: List<String>? = null,
     val abilities: List<String>? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Pokemon) return false
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+}

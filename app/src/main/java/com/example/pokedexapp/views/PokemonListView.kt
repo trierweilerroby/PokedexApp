@@ -72,13 +72,18 @@ fun PokemonListView(
                     row.forEach { pokemon ->
                         PokemonCard(
                             pokemon = pokemon,
-                            isFavorite = dataStore.isFavorite(pokemon),
-                            onFavoriteToggle = {
-                                dataStore.toggleFavorite(pokemon)
+                            dataStore = dataStore,
+                            onClick = {
+                                navController.navigate("pokemonDetail/${pokemon.id}")
                             }
-                        ){
-                            navController.navigate("pokemonDetail/${pokemon.id}")
+                        )
+                        /*isFavorite = dataStore.isFavorite(pokemon),
+                        onFavoriteToggle = {
+                            dataStore.toggleFavorite(pokemon)
                         }
+                    ) {
+                        navController.navigate("pokemonDetail/${pokemon.id}")
+                    }*/
                     }
                 }
             }

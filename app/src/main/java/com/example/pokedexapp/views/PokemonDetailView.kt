@@ -48,16 +48,15 @@ import com.example.pokedexapp.data.DataStore
 @Composable
 fun PokemonDetailView(
     pokemon: Pokemon,
-    isFavorite: Boolean,
-    //dataStore: DataStore = hiltViewModel()
-    onToggleFavorite: (Pokemon) -> Unit
+    //isFavorite: Boolean,
+    dataStore: DataStore = hiltViewModel(),
+    //onToggleFavorite: (Pokemon) -> Unit
 ) {
     // Add a ScrollState to enable scrolling
     val scrollState = rememberScrollState()
 
-   /* val isFavorite by dataStore.favoritePokemonList.collectAsState().let {
-        derivedStateOf { it.value.contains(pokemon) }
-    }*/
+    val favoritePokemonList by dataStore.favoritePokemonList.collectAsState()
+    val isFavorite = favoritePokemonList.contains(pokemon)
 
     Column(
         modifier = Modifier
@@ -91,8 +90,7 @@ fun PokemonDetailView(
                 modifier = Modifier
                     .size(28.dp)
                     .clickable {
-                        //dataStore.toggleFavorite(pokemon)
-                        onToggleFavorite(pokemon)
+                        dataStore.toggleFavorite(pokemon)
                     },
                 tint = if (isFavorite) Color.Red else Color.Gray
             )

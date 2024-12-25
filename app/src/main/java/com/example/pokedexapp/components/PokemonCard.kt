@@ -19,6 +19,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,19 +32,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.pokedexapp.data.DataStore
 import com.example.pokedexapp.model.Pokemon
 import java.util.Locale
 
 @Composable
 fun PokemonCard(
     pokemon: Pokemon,
-    isFavorite: Boolean,
-    onFavoriteToggle: (Pokemon) -> Unit,
+    //isFavorite: Boolean,
+    //onFavoriteToggle: (Pokemon) -> Unit,
+    dataStore : DataStore,
     onClick: () -> Unit,
     // showSnackbar: (String) -> Unit
 ) {
 
-    var favoriteState by remember { mutableStateOf(isFavorite) }
+    //var favoriteState by remember { mutableStateOf(isFavorite) }
+
+    val favoritePokemonList by dataStore.favoritePokemonList.collectAsState()
+    val isFavorite = favoritePokemonList.contains(pokemon)
 
     Card(
         modifier = Modifier
@@ -82,12 +89,12 @@ fun PokemonCard(
 
                 // Favorites Icon
                 androidx.compose.material3.Icon(
-                    imageVector = if (favoriteState) {
+                    imageVector = if (isFavorite) {
                         androidx.compose.material.icons.Icons.Filled.Favorite
                     } else {
                         androidx.compose.material.icons.Icons.Outlined.FavoriteBorder
                     },
-                    contentDescription = if (favoriteState) {
+                    contentDescription = if (isFavorite) {
                         "Unfavorite Pokémon"
                     } else {
                         "Favorite Pokémon"
@@ -98,8 +105,7 @@ fun PokemonCard(
                         Color.Gray
                     },
                     modifier = Modifier.clickable {
-                        favoriteState = !favoriteState
-                        onFavoriteToggle(pokemon)
+                        dataStore.toggleFavorite(pokemon)
                         /*
                         Uncomment the following lines when integrating snackbar logic
                         if (!isFavorite) {
