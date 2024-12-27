@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.pokedexapp.interfaces.PokemonAPIService
 import com.example.pokedexapp.mappers.PokemonDetailsMapper
 import com.example.pokedexapp.mappers.PokemonListMapper
+import com.example.pokedexapp.model.EvolutionNode
 import com.example.pokedexapp.model.Pokemon
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +53,7 @@ class DataStore @Inject constructor(
             }
         }
     }
-    
+
 
     // Toggle the favorite status of a Pokémon
     fun toggleFavorite(selectedPokemon: Pokemon) {
@@ -84,4 +85,67 @@ class DataStore @Inject constructor(
             }
         }
     }
+
+
+    fun getEvolutionChainForPokemon(id: Int, onResult: (List<Pokemon>?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                // Step 1: Fetch Pokémon species details
+                val speciesResponse = apiService.getPokemonSpecies(id)
+
+
+                // Step 2: Fetch evolution chain using the species' evolution chain URL
+                val evolutionChainUrl = speciesResponse.evolution_chain.url
+                val evolutionChainId = extractIdFromUrl(evolutionChainUrl)
+                val evolutionResponse = apiService.getEvolutionChain(evolutionChainId)
+
+                // Step 3: Parse the evolution chain to get Pokémon details
+                val evolutions = parseEvolutionChain(evolutionResponse.chain)
+
+
+                // Pass the parsed evolution chain Pokémon details
+                onResult(evolutions)
+            } catch (e: Exception) {
+                Log.e("DataStore", "Error fetching evolution chain for Pokémon ID $id", e)
+                onResult(null)
+            }
+        }
+    }
+
+    private fun parseEvolutionChain(node: EvolutionNode?): List<Pokemon> {
+        if (node == null) return emptyList()
+
+        val result = mutableListOf<Pokemon>()
+        var current: EvolutionNode? = node
+        while (current != null) {
+            val id = extractIdFromUrl(current.species.url)
+            if (id != -1) {
+                result.add(
+                    Pokemon(
+                        id = id,
+                        name = current.species.name,
+                        imageUrl = generatePokemonImageUrl(id)
+                    )
+                )
+            }
+            current = current.evolves_to.firstOrNull()
+        }
+        return result
+    }
+
+
+    private fun extractIdFromUrl(url: String): Int {
+        return try {
+            url.split("/").dropLast(1).last().toInt()
+        } catch (e: Exception) {
+            Log.e("DataStore", "Error extracting ID from URL: $url", e)
+            -1
+        }
+    }
+
+    private fun generatePokemonImageUrl(id: Int): String {
+        return "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png"
+    }
+
+
 }

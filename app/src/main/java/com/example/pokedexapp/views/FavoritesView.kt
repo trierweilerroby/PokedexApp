@@ -41,7 +41,8 @@ fun FavoritesView(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFE0F7FA))
-            .padding(start = 10.dp, top = 60.dp)
+            .padding(start = 10.dp, top = 60.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Title for Favourite Pokémon
         Text(
@@ -54,36 +55,45 @@ fun FavoritesView(
         // Snackbar Host for showing messages
         SnackbarHost(hostState = snackbarHostState)
 
-        // Favourite Pokémon List
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 8.dp)
-        ) {
-            items(favoritePokemonList.chunked(2)) { row ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
+        if (favoritePokemonList.isEmpty()) {
+            // Display a message if there are no favorite Pokémon
+            Text(
+                text = "No favorite Pokémon found.",
+                style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray),
+                modifier = Modifier.padding(16.dp)
+            )
+        } else {
+            // Favourite Pokémon List
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                items(favoritePokemonList.chunked(2)) { row ->
+                    Box(
                         modifier = Modifier
-                            .wrapContentWidth()
-                            .padding(8.dp),
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        row.forEach { pokemon ->
-                            PokemonCard(
-                                pokemon = pokemon,
-                                dataStore = dataStore,
-                                onClick = {
-                                    navController.navigate("pokemonDetail/${pokemon.id}")
-                                },
-                                showSnackbar = { message ->
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(message)
+                        Row(
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .padding(8.dp),
+                        ) {
+                            row.forEach { pokemon ->
+                                PokemonCard(
+                                    pokemon = pokemon,
+                                    dataStore = dataStore,
+                                    onClick = {
+                                        navController.navigate("pokemonDetail/${pokemon.id}")
+                                    },
+                                    showSnackbar = { message ->
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar(message)
+                                        }
                                     }
-                                }
-                            )
+                                )
+                            }
                         }
                     }
                 }
@@ -91,3 +101,4 @@ fun FavoritesView(
         }
     }
 }
+

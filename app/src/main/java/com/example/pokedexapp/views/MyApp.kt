@@ -79,11 +79,8 @@ fun MyApp(
                             // Pass `onToggleFavorite` to update favorites
                             PokemonDetailView(
                                 pokemon = fetchedPokemon,
-                                /*isFavorite = isFavorite,
-                                onToggleFavorite = { selectedPokemon ->
-                                    dataStore.toggleFavorite(selectedPokemon)
-                                }*/
-                                dataStore = dataStore
+                                dataStore = dataStore,
+                                navController = navController
                             )
                         } ?: run {
                             Text("Pokémon not found")
