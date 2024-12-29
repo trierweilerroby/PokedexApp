@@ -14,7 +14,10 @@ class PokemonDetailsMapper @Inject constructor() {
             height = response.height,
             weight = response.weight,
             types = response.types.map { it.type.name }, // Map type names
-            abilities = response.abilities.map { it.ability.name } // Map ability names
+            abilities = response.abilities.map { it.ability.name }, // Map ability names
+            stats = response.stats.associate {
+                it.stat.name.capitalize() to it.base_stat // Map stats with name as key and base_stat as value
+            }
         )
     }
 }

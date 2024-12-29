@@ -23,9 +23,6 @@ class DataStore @Inject constructor(
     private val pokemonDetailsMapper: PokemonDetailsMapper
 ) : ViewModel() {
 
-    private val _favoritePokemonList = MutableStateFlow<Set<Pokemon>>(emptySet())
-    val favoritePokemonList: StateFlow<Set<Pokemon>> = _favoritePokemonList
-
 
     private val apiService: PokemonAPIService = Retrofit.Builder()
         .baseUrl("https://pokeapi.co/api/v2/")
@@ -35,6 +32,9 @@ class DataStore @Inject constructor(
 
     private val _pokemonList = MutableStateFlow<List<Pokemon>>(emptyList())
     val pokemonList: StateFlow<List<Pokemon>> = _pokemonList
+
+    private val _favoritePokemonList = MutableStateFlow<Set<Pokemon>>(emptySet())
+    val favoritePokemonList: StateFlow<Set<Pokemon>> = _favoritePokemonList
 
 
     init {

@@ -1,5 +1,6 @@
 package com.example.pokedexapp.views
 
+import StatsSection
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.Image
@@ -201,7 +202,13 @@ fun PokemonDetailView(
                 }
             }
             "Stats" -> {
-                Text("Stats tab", style = MaterialTheme.typography.bodyMedium)
+                // Call the StatsSection here
+                pokemon.stats?.let { stats ->
+                    StatsSection(stats = stats)
+                } ?: Text(
+                    text = "Stats data not available.",
+                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
+                )
             }
             "Evolution" -> {
                 evolutionData.value?.let { evolutions ->
