@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.hilt.common)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -100,10 +101,13 @@ dependencies {
 
     // Exercise 6
     implementation(libs.androidx.datastore.preferences)
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
     //implementation(libs.retrofit.v230)
    implementation(libs.converter.gson)
    // implementation(libs.kotlinx.coroutines.core.v173)
    // implementation(libs.kotlinx.coroutines.android.v173)
+    implementation (libs.androidx.core.splashscreen)
+
 
     implementation(libs.material3)
 

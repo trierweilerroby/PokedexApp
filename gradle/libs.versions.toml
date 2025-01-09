@@ -2,6 +2,7 @@
 # Default
 agp = "8.7.1"
 androidxNavigationCompose = "2.7.2"
+coreSplashscreen = "1.0.1"
 kotlin = "2.0.20"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -36,10 +37,12 @@ coil = "2.7.0"
 datastorePreferences = "1.1.1"
 
 material3 = "1.1.0-alpha04"
+hiltCommon = "1.2.0"
 
 [libraries]
 # Default
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -84,6 +87,7 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 
 # Exercise 6 and onwards
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences"}
+androidx-hilt-common = { group = "androidx.hilt", name = "hilt-common", version.ref = "hiltCommon" }
 
 [plugins]
 # Default
