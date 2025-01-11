@@ -76,13 +76,13 @@ class DataStore @Inject constructor(
     fun toggleFavorite(selectedPokemon: Pokemon) {
         viewModelScope.launch {
             val isFavorite = _favoritePokemonList.value.contains(selectedPokemon)
-
+            Log.d("DataStore", "favorites: $isFavorite")
             // Update the StateFlow
             _favoritePokemonList.update { currentFavorites ->
                 if (isFavorite) currentFavorites - selectedPokemon
                 else currentFavorites + selectedPokemon
             }
-
+            Log.d("DataStore", "favorites: $_favoritePokemonList")
             // Persist the updated favorites
             val favoriteNames = _favoritePokemonList.value.map { it.name }.toSet()
             saveFavoritesToDataStore(favoriteNames)
@@ -91,6 +91,7 @@ class DataStore @Inject constructor(
 
     private suspend fun saveFavoritesToDataStore(favorites: Set<String>) {
         context.dataStore.edit { preferences ->
+            Log.d("DataStore", "Saving favorites: $favorites")
             preferences[FAVORITES_KEY] = favorites
         }
     }
@@ -100,11 +101,16 @@ class DataStore @Inject constructor(
             context.dataStore.data.map { preferences ->
                 preferences[FAVORITES_KEY] ?: emptySet()
             }.collect { savedFavorites ->
-                // Prevent overwriting current state if already loaded
-                if (_favoritePokemonList.value.isEmpty()) {
-                    val favorites = _pokemonList.value.filter { it.name in savedFavorites }.toSet()
-                    _favoritePokemonList.value = favorites
+                Log.d("DataStore", "Loaded favorites from DataStore: $savedFavorites")
+
+                // Wait until _pokemonList has been populated
+                while (_pokemonList.value.isEmpty()) {
+                    delay(100) // Small delay to wait for the data
                 }
+
+                val favorites = _pokemonList.value.filter { it.name in savedFavorites }.toSet()
+                _favoritePokemonList.value = favorites
+                Log.d("DataStore", "Updated favorite list: ${_favoritePokemonList.value}")
             }
         }
     }
