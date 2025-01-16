@@ -12,7 +12,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.Pokedexapp"
+        applicationId = "com.example.pokedexapp682474.Pokedexapp"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
