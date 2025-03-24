@@ -101,7 +101,7 @@ dependencies {
 
     // Exercise 6
     implementation(libs.androidx.datastore.preferences)
-    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.datastore:datastore-preferences:1.1.0-alpha04")
     //implementation(libs.retrofit.v230)
    implementation(libs.converter.gson)
    // implementation(libs.kotlinx.coroutines.core.v173)

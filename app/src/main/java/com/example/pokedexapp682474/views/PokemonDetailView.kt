@@ -38,7 +38,9 @@ import com.example.pokedexapp682474.theme.lightCustomColors
 import java.util.Locale
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,189 +49,180 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.pokedexapp682474.data.DataStore
 import com.example.pokedexapp682474.components.EvolutionSection
+import com.example.pokedexapp682474.viewmodels.PokemonDetailViewModel
 
 
 @Composable
 fun PokemonDetailView(
-    pokemon: Pokemon,
-    dataStore: DataStore = hiltViewModel(),
-    navController: NavController
+    pokemonId: Int,
+    navController: NavController,
+    viewModel: PokemonDetailViewModel = hiltViewModel()
 ) {
-    // Add a ScrollState to enable scrolling
     val scrollState = rememberScrollState()
-
     val selectedTab = remember { mutableStateOf("About") }
 
-    val favoritePokemonList by dataStore.favoritePokemonList.collectAsState()
-    val isFavorite = favoritePokemonList.contains(pokemon)
+    // Load Pokémon details
+    LaunchedEffect(pokemonId) {
+        viewModel.loadPokemon(pokemonId)
+    }
+
+    val pokemon by viewModel.pokemon.collectAsState()
+    val isFavorite by viewModel.isFavorite.collectAsState()
+    val evolutionData by viewModel.evolutionChain.collectAsState()
+    val loading by viewModel.loading.collectAsState()
 
     val context = LocalContext.current
 
-    val evolutionData = remember { mutableStateOf<List<Pokemon>?>(null) }
-    // Fetch evolution data
-    LaunchedEffect(pokemon.id) {
-        dataStore.getEvolutionChainForPokemon(pokemon.id) { fetchedEvolutions ->
-            evolutionData.value = fetchedEvolutions
-        }
+    if (loading) {
+        Text("Loading...")
+        return
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(LightColorScheme.background)
-            .verticalScroll(scrollState)
-            .padding(horizontal = 20.dp, vertical = 60.dp),
-        horizontalAlignment = Alignment.Start
-    ) {
-        Row(
+    pokemon?.let { poke ->
+
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .background(LightColorScheme.background)
+                .verticalScroll(scrollState)
+                .padding(horizontal = 20.dp, vertical = 60.dp),
+            horizontalAlignment = Alignment.Start
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back"
+                    )
+                }
+
+                Text(
+                    text = poke.name.replaceFirstChar { it.titlecase(Locale.ROOT) },
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2C2C2C)
+                    )
+                )
+
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = "Share Pokémon",
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clickable { sharePokemon(context, poke) },
+                    tint = Color.Gray
+                )
+                Icon(
+                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = "Favorite Pokémon",
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clickable { viewModel.toggleFavorite() },
+                    tint = if (isFavorite) Color.Red else Color.Gray
+                )
+            }
+
 
             Text(
-                text = pokemon.name.replaceFirstChar { it.titlecase(Locale.ROOT) },
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2C2C2C)
-                )
+                text = "#${poke.id.toString().padStart(3, '0')}",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = Color(0xFF8E8E8E),
+                    fontSize = 18.sp
+                ),
+                modifier = Modifier.align(Alignment.End)
             )
 
-            
-            // favorites
-            Icon(
-                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                contentDescription = "Favorite Pokémon",
-                modifier = Modifier
-                    .size(28.dp)
-                    .clickable {
-                        dataStore.toggleFavorite(pokemon)
-                    },
-                tint = if (isFavorite) Color.Red else Color.Gray
-            )
-        }
-
-        // Share Icon
-        Icon(
-            imageVector = androidx.compose.material.icons.Icons.Default.Share,
-            contentDescription = "Share Pokémon",
-            modifier = Modifier
-                .size(28.dp)
-                .clickable {
-                    sharePokemon(context, pokemon)
-                },
-            tint = Color.Gray
-        )
-
-        // Pokemon ID
-        Text(
-            text = "#${pokemon.id.toString().padStart(3, '0')}",
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = Color(0xFF8E8E8E),
-                fontSize = 18.sp
-            ),
-            modifier = Modifier.align(Alignment.End)
-        )
-
-        // Types (Badge-like elements)
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(bottom = 16.dp)
-        ) {
-            pokemon.types?.forEach { type ->
-                TypeBadge(type = type, badgeColor = getTypeColor(type))
-            }
-        }
-
-        // Pokemon Image
-        Image(
-            painter = rememberAsyncImagePainter(pokemon.imageUrl),
-            contentDescription = "${pokemon.name} image",
-            modifier = Modifier
-                .size(200.dp) // Larger image size
-                .align(Alignment.CenterHorizontally)
-                .padding(16.dp)
-        )
-
-        // Tabs (About, Stats, Evolution)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .padding(vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            TabItem(
-                text = "About",
-                selected = selectedTab.value == "About",
-                onClick = { selectedTab.value = "About" }
-            )
-            TabItem(
-                text = "Stats",
-                selected = selectedTab.value == "Stats",
-                onClick = { selectedTab.value = "Stats" }
-            )
-            TabItem(
-                text = "Evolution",
-                selected = selectedTab.value == "Evolution",
-                onClick = { selectedTab.value = "Evolution" }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Conditional Rendering Based on Selected Tab
-        when (selectedTab.value) {
-            "About" -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.White)
-                        .padding(10.dp),
-                ) {
-                    InfoRow(label = "Name", value = pokemon.name.replaceFirstChar { it.titlecase(Locale.ROOT) })
-                    InfoRow(label = "ID", value = "#${pokemon.id.toString().padStart(3, '0')}")
-                    InfoRow(label = "Base", value = "${pokemon.baseExperience} XP")
-                    InfoRow(label = "Weight", value = "${pokemon.weight?.div(10.0)} kg")
-                    InfoRow(label = "Height", value = "${pokemon.height?.div(10.0)} m")
-                    InfoRow(label = "Types", value = pokemon.types?.joinToString(", ") ?: "")
-                    InfoRow(label = "Abilities", value = pokemon.abilities?.joinToString(", ") ?: "")
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
+                poke.types?.forEach { type ->
+                    TypeBadge(type = type, badgeColor = getTypeColor(type))
                 }
             }
-            "Stats" -> {
-                // Call the StatsSection here
-                pokemon.stats?.let { stats ->
-                    StatsSection(stats = stats)
-                } ?: Text(
-                    text = "Stats data not available.",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
-                )
+
+            Image(
+                painter = rememberAsyncImagePainter(poke.imageUrl),
+                contentDescription = "${poke.name} image",
+                modifier = Modifier
+                    .size(200.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .padding(16.dp)
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                TabItem("About", selectedTab.value == "About") { selectedTab.value = "About" }
+                TabItem("Stats", selectedTab.value == "Stats") { selectedTab.value = "Stats" }
+                TabItem("Evolution", selectedTab.value == "Evolution") { selectedTab.value = "Evolution" }
             }
-            "Evolution" -> {
-                evolutionData.value?.let { evolutions ->
-                    Box(
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            when (selectedTab.value) {
+                "About" -> {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
+                            .background(Color.White)
+                            .padding(10.dp),
                     ) {
-                        EvolutionSection(evolutions) { selectedPokemon ->
-                                navController.navigate("pokemonDetail/${selectedPokemon.id}")
-                        }
+                        InfoRow("Name", poke.name.replaceFirstChar { it.titlecase(Locale.ROOT) })
+                        InfoRow("ID", "#${poke.id.toString().padStart(3, '0')}")
+                        InfoRow("Base", "${poke.baseExperience} XP")
+                        InfoRow("Weight", "${poke.weight?.div(10.0)} kg")
+                        InfoRow("Height", "${poke.height?.div(10.0)} m")
+                        InfoRow("Types", poke.types?.joinToString(", ") ?: "")
+                        InfoRow("Abilities", poke.abilities?.joinToString(", ") ?: "")
                     }
-                } ?: Text(
-                    text = "Loading evolution data...",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
-                )
+                }
+                "Stats" -> {
+                    poke.stats?.let {
+                        StatsSection(stats = it)
+                    } ?: Text(
+                        text = "Stats data not available.",
+                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
+                    )
+                }
+                "Evolution" -> {
+                    if (evolutionData.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            EvolutionSection(evolutionData) { selected ->
+                                navController.navigate("pokemonDetail/${selected.id}")
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = "Loading evolution data...",
+                            style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
+                        )
+                    }
+                }
             }
         }
-    }
+
+    } ?: Text("Pokémon not found.")
 }
+
 
 
 private fun getTypeColor(type: String): Color {

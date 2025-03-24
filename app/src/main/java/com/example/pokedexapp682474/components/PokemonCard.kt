@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
@@ -27,22 +28,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.example.pokedexapp682474.data.DataStore
 import com.example.pokedexapp682474.model.Pokemon
 import java.util.Locale
 
 @Composable
 fun PokemonCard(
     pokemon: Pokemon,
-    dataStore : DataStore,
+    isFavorite: Boolean,
     onClick: () -> Unit,
+    onToggleFavorite: () -> Unit,
     showSnackbar: (String) -> Unit
 ) {
-
-
-    val favoritePokemonList by dataStore.favoritePokemonList.collectAsState()
-    val isFavorite = favoritePokemonList.contains(pokemon)
-
     Card(
         modifier = Modifier
             .size(width = 181.dp, height = 220.dp)
@@ -66,7 +62,6 @@ fun PokemonCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Pokémon ID
                 Text(
                     text = pokemon.id.toString().padStart(3, '0'),
                     color = Color.White,
@@ -79,36 +74,23 @@ fun PokemonCard(
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 15.sp)
                 )
 
-                // Favorites Icon
                 androidx.compose.material3.Icon(
-                    imageVector = if (isFavorite) {
-                        androidx.compose.material.icons.Icons.Filled.Favorite
-                    } else {
-                        androidx.compose.material.icons.Icons.Outlined.FavoriteBorder
-                    },
-                    contentDescription = if (isFavorite) {
-                        "Unfavorite Pokémon"
-                    } else {
-                        "Favorite Pokémon"
-                    },
-                    tint = if (isFavorite) {
-                        Color.Red
-                    } else {
-                        Color.Gray
-                    },
+                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = if (isFavorite) "Unfavorite Pokémon" else "Favorite Pokémon",
+                    tint = if (isFavorite) Color.Red else Color.Gray,
                     modifier = Modifier.clickable {
-                        dataStore.toggleFavorite(pokemon)
-                        // Trigger Snackbar callback
-                        if (isFavorite) {
-                            showSnackbar("${pokemon.name} removed from Favorites")
+                        onToggleFavorite()
+                        val message = if (!isFavorite) {
+
+                            "${pokemon.name} added to Favorites"
                         } else {
-                            showSnackbar("${pokemon.name} added to Favorites")
+                            "${pokemon.name} removed from Favorites"
                         }
+                        showSnackbar(message)
                     }
                 )
             }
 
-            // Pokémon Image
             Image(
                 painter = rememberAsyncImagePainter(model = pokemon.imageUrl),
                 contentDescription = "${pokemon.name} image",
@@ -117,7 +99,6 @@ fun PokemonCard(
                     .padding(8.dp)
             )
 
-            // Pokémon Name
             Text(
                 text = pokemon.name.replaceFirstChar { it.titlecase(Locale.ROOT) },
                 modifier = Modifier
@@ -132,4 +113,3 @@ fun PokemonCard(
         }
     }
 }
-

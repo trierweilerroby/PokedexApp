@@ -20,22 +20,22 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.pokedexapp682474.components.PokemonCard
-import com.example.pokedexapp682474.data.DataStore
+import com.example.pokedexapp682474.viewmodels.FavoritesViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun FavoritesView(
-    dataStore: DataStore = hiltViewModel(),
+    viewModel: FavoritesViewModel = hiltViewModel(),
     navController: NavController
 ) {
-    // Collect the favorite Pokémon list from the store
-    val favoritePokemonList by dataStore.favoritePokemonList.collectAsState(emptyList())
+    val allPokemons by viewModel.pokemonList.collectAsState()
+    val favoriteIds by viewModel.favoritePokemonList.collectAsState()
 
-    // Snackbar host state for showing messages
+    val favoritePokemonList = allPokemons.filter { it.id in favoriteIds }
+
+
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
-
-    println("Favorites: $favoritePokemonList")
 
     Column(
         modifier = Modifier
@@ -44,7 +44,6 @@ fun FavoritesView(
             .padding(start = 10.dp, top = 60.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Title for Favourite Pokémon
         Text(
             text = "Your Favourite Pokémon's",
             style = MaterialTheme.typography.headlineMedium,
@@ -52,48 +51,38 @@ fun FavoritesView(
                 .padding(start = 10.dp, bottom = 6.dp)
         )
 
-        // Snackbar Host for showing messages
         SnackbarHost(hostState = snackbarHostState)
 
         if (favoritePokemonList.isEmpty()) {
-            // Display a message if there are no favorite Pokémon
             Text(
                 text = "No favorite Pokémon found.",
                 style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray),
                 modifier = Modifier.padding(16.dp)
             )
         } else {
-            // Favourite Pokémon List
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
                 items(favoritePokemonList.chunked(2)) { row ->
-                    Box(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .wrapContentHeight(),
-                        contentAlignment = Alignment.Center
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.SpaceAround
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .padding(8.dp),
-                        ) {
-                            row.forEach { pokemon ->
-                                PokemonCard(
-                                    pokemon = pokemon,
-                                    dataStore = dataStore,
-                                    onClick = {
-                                        navController.navigate("pokemonDetail/${pokemon.id}")
-                                    },
-                                    showSnackbar = { message ->
-                                        coroutineScope.launch {
-                                            snackbarHostState.showSnackbar(message)
-                                        }
+                        row.forEach { pokemon ->
+                            PokemonCard(
+                                pokemon = pokemon,
+                                isFavorite = true,
+                                onClick = { navController.navigate("pokemonDetail/${pokemon.id}") },
+                                onToggleFavorite = { viewModel.toggleFavorite(pokemon) },
+                                showSnackbar = { message ->
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(message)
                                     }
-                                )
-                            }
+                                }
+                            )
                         }
                     }
                 }
@@ -101,4 +90,3 @@ fun FavoritesView(
         }
     }
 }
-

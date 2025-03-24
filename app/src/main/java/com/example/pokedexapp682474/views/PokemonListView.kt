@@ -2,7 +2,9 @@ package com.example.pokedexapp682474.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -18,16 +20,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.pokedexapp682474.components.PokemonCard
-import com.example.pokedexapp682474.data.DataStore
+import com.example.pokedexapp682474.viewmodels.PokemonListViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun PokemonListView(
-    dataStore: DataStore = hiltViewModel(),
+    viewModel: PokemonListViewModel = hiltViewModel(),
     navController: NavController,
     searchQuery: String
 ) {
-    val pokemonList by dataStore.pokemonList.collectAsState()
+    val pokemonList by viewModel.pokemonList.collectAsState()
+    val favorites by viewModel.favorites.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -46,45 +49,36 @@ fun PokemonListView(
             .padding(16.dp)
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Snackbar Host for displaying messages
         SnackbarHost(hostState = snackbarHostState)
 
-        // Title
         Text(
             text = "All Pokémon's",
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier
-                .padding(start = 10.dp, bottom = 6.dp)
+            modifier = Modifier.padding(start = 10.dp, bottom = 6.dp)
         )
 
-        // Pokémon List
-        LazyColumn(
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 8.dp)
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(filteredPokemonList.chunked(2)) { row ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    row.forEach { pokemon ->
-                        PokemonCard(
-                            pokemon = pokemon,
-                            dataStore = dataStore,
-                            onClick = {
-                                navController.navigate("pokemonDetail/${pokemon.id}")
-                            },
-                            showSnackbar = { message ->
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar(message)
-                                }
-                            }
-                        )
+            items(
+                items = filteredPokemonList,
+                key = { it.id }
+            ) { pokemon ->
+                PokemonCard(
+                    pokemon = pokemon,
+                    isFavorite = favorites.contains(pokemon.id),
+                    onClick = { navController.navigate("pokemonDetail/${pokemon.id}") },
+                    onToggleFavorite = { viewModel.toggleFavorite(pokemon) },
+                    showSnackbar = { message ->
+                        coroutineScope.launch { snackbarHostState.showSnackbar(message) }
                     }
-                }
+                )
             }
         }
+
     }
 }
