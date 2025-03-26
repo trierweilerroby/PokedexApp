@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.pokedexapp682474.components.AnimatedSnackbarHost
 import com.example.pokedexapp682474.components.PokemonCard
 import com.example.pokedexapp682474.viewmodels.FavoritesViewModel
 import kotlinx.coroutines.launch
@@ -51,7 +52,7 @@ fun FavoritesView(
                 .padding(start = 10.dp, bottom = 6.dp)
         )
 
-        SnackbarHost(hostState = snackbarHostState)
+        AnimatedSnackbarHost(hostState = snackbarHostState)
 
         if (favoritePokemonList.isEmpty()) {
             Text(

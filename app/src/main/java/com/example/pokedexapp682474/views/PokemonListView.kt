@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.pokedexapp682474.components.AnimatedSnackbarHost
 import com.example.pokedexapp682474.components.PokemonCard
 import com.example.pokedexapp682474.viewmodels.PokemonListViewModel
 import kotlinx.coroutines.launch
@@ -49,7 +50,7 @@ fun PokemonListView(
             .padding(16.dp)
             .background(MaterialTheme.colorScheme.background)
     ) {
-        SnackbarHost(hostState = snackbarHostState)
+        AnimatedSnackbarHost(hostState = snackbarHostState)
 
         Text(
             text = "All Pokémon's",
