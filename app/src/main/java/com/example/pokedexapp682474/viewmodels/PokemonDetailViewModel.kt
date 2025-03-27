@@ -17,6 +17,11 @@ class PokemonDetailViewModel @Inject constructor(
     private val repository: PokemonRepository
 ) : ViewModel() {
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
+    private var lastAttemptedId: Int? = null
+
     private val _pokemon = MutableStateFlow<Pokemon?>(null)
     val pokemon: StateFlow<Pokemon?> = _pokemon.asStateFlow()
 
@@ -30,13 +35,20 @@ class PokemonDetailViewModel @Inject constructor(
     val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
     fun loadPokemon(id: Int) {
+        lastAttemptedId = id
         viewModelScope.launch {
             _loading.value = true
-            val fetchedPokemon = repository.getPokemonDetails(id)
-            _pokemon.value = fetchedPokemon
-            _loading.value = false
-            updateFavoriteState(fetchedPokemon)
-            loadEvolution(id)
+            _error.value = null
+            try {
+                val fetchedPokemon = repository.getPokemonDetails(id)
+                _pokemon.value = fetchedPokemon
+                updateFavoriteState(fetchedPokemon)
+                loadEvolution(id)
+            } catch (e: Exception) {
+                _error.value = "Failed to load Pokémon details"
+            } finally {
+                _loading.value = false
+            }
         }
     }
 
@@ -52,6 +64,10 @@ class PokemonDetailViewModel @Inject constructor(
             val chain = repository.getEvolutionChain(id)
             _evolutionChain.value = chain ?: emptyList()
         }
+    }
+
+    fun retry() {
+        lastAttemptedId?.let { loadPokemon(it) }
     }
 
     fun toggleFavorite() {
