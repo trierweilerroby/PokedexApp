@@ -6,6 +6,10 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -27,6 +31,7 @@ import com.example.pokedexapp682474.components.PokemonCard
 import com.example.pokedexapp682474.viewmodels.PokemonListViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PokemonListView(
     viewModel: PokemonListViewModel = hiltViewModel(),
@@ -41,79 +46,66 @@ fun PokemonListView(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
+    val isRefreshing = loading
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = { viewModel.fetchPokemonList() }
+    )
 
     LaunchedEffect(error) {
         error?.let {
-            val result = snackbarHostState.showSnackbar(
-                message = it,
-                actionLabel = "Retry"
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                viewModel.retry()
-            }
+            snackbarHostState.showSnackbar(it)
         }
     }
 
-
-
-    if (loading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 100.dp),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            androidx.compose.material3.CircularProgressIndicator()
-        }
-        return
-    }
-
-
-    // Filter Pokémon based on the search query
-    val filteredPokemonList = if (searchQuery.isNotEmpty()) {
-        pokemonList.filter { pokemon ->
-            pokemon.name.contains(searchQuery, ignoreCase = true)
-        }
-    } else {
-        pokemonList
-    }
-
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.background)
+            .pullRefresh(pullRefreshState)
     ) {
-        AnimatedSnackbarHost(hostState = snackbarHostState)
-
-        Text(
-            text = "All Pokémon's",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(start = 10.dp, bottom = 6.dp)
-        )
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            items(
-                items = filteredPokemonList,
-                key = { it.id }
-            ) { pokemon ->
-                PokemonCard(
-                    pokemon = pokemon,
-                    isFavorite = favorites.contains(pokemon.id),
-                    onClick = { navController.navigate("pokemonDetail/${pokemon.id}") },
-                    onToggleFavorite = { viewModel.toggleFavorite(pokemon) },
-                    showSnackbar = { message ->
-                        coroutineScope.launch { snackbarHostState.showSnackbar(message) }
-                    }
-                )
+            AnimatedSnackbarHost(hostState = snackbarHostState)
+
+            Text(
+                text = "All Pokémon's",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(start = 10.dp, bottom = 6.dp)
+            )
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                val filteredList = if (searchQuery.isNotEmpty()) {
+                    pokemonList.filter { it.name.contains(searchQuery, ignoreCase = true) }
+                } else pokemonList
+
+                items(filteredList, key = { it.id }) { pokemon ->
+                    PokemonCard(
+                        pokemon = pokemon,
+                        isFavorite = favorites.contains(pokemon.id),
+                        onClick = { navController.navigate("pokemonDetail/${pokemon.id}") },
+                        onToggleFavorite = { viewModel.toggleFavorite(pokemon) },
+                        showSnackbar = { message ->
+                            coroutineScope.launch { snackbarHostState.showSnackbar(message) }
+                        }
+                    )
+                }
             }
         }
 
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
 }

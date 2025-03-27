@@ -33,7 +33,7 @@ class PokemonListViewModel @Inject constructor(
         fetchPokemonList()
     }
 
-    private fun fetchPokemonList() {
+    fun fetchPokemonList() {
         lastFetchAttempt = { fetchPokemonList() }
         viewModelScope.launch {
             _loading.value = true
